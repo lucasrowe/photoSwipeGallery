@@ -80,28 +80,78 @@
 
     <!-- Gallery -->
     <div class="imageGallery" itemscope itemtype="http://schema.org/ImageGallery">
-      <a class="thumbnail justifiedGallery" itemprop="contentUrl" href="https://placekitten.com/1200/900" data-size="1200x900" data-index="0">
-        <img src="https://placekitten.com/300/150" alt="Image description" />
-      </a>
-      <a class="thumbnail justifiedGallery" itemprop="contentUrl" href="https://placekitten.com/1200/900" data-size="300x150" data-index="1">
-        <img src="https://placekitten.com/300/150" alt="Image description" />
-      </a>
-      <a class="thumbnail justifiedGallery" itemprop="contentUrl" href="https://placekitten.com/1200/900" data-size="300x150" data-index="2">
-        <img src="https://placekitten.com/300/150" alt="Image description" />
-      </a>
-      <a class="thumbnail justifiedGallery" itemprop="contentUrl" href="https://placekitten.com/1200/900" data-size="300x150" data-index="3">
-        <img src="https://placekitten.com/300/150" alt="Image description" />
-      </a>
-      <a class="thumbnail justifiedGallery" itemprop="contentUrl" href="https://placekitten.com/1200/900" data-size="300x150" data-index="4">
-        <img src="https://placekitten.com/300/150" alt="Image description" />
-      </a>
-      <a class="thumbnail justifiedGallery" itemprop="contentUrl" href="https://placekitten.com/1200/900" data-size="300x150" data-index="5">
-        <img src="https://placekitten.com/300/150" alt="Image description" />
-      </a>
-      <a class="thumbnail justifiedGallery" itemprop="contentUrl" href="https://placekitten.com/1200/900" data-size="300x150" data-index="6">
-        <img src="https://placekitten.com/300/150" alt="Image description" />
-      </a>
-    </div>
+    <?php
+
+    // This code grabbed from
+    // https://davidwalsh.name/generate-photo-gallery
+
+    /* function:  generates thumbnail */
+    function make_thumb($src,$dest,$desired_width) {
+    	/* read the source image */
+    	$source_image = imagecreatefromjpeg($src);
+    	$width = imagesx($source_image);
+    	$height = imagesy($source_image);
+    	/* find the "desired height" of this thumbnail, relative to the desired width  */
+    	$desired_height = floor($height*($desired_width/$width));
+    	/* create a new, "virtual" image */
+    	$virtual_image = imagecreatetruecolor($desired_width,$desired_height);
+    	/* copy source image at a resized size */
+    	imagecopyresized($virtual_image,$source_image,0,0,0,0,$desired_width,$desired_height,$width,$height);
+    	/* create the physical thumbnail image to its destination */
+    	imagejpeg($virtual_image,$dest);
+    }
+
+    /* function:  returns files from dir */
+    function get_files($images_dir,$exts = array('jpg')) {
+    	$files = array();
+    	if($handle = opendir($images_dir)) {
+    		while(false !== ($file = readdir($handle))) {
+    			$extension = strtolower(get_file_extension($file));
+    			if($extension && in_array($extension,$exts)) {
+    				$files[] = $file;
+    			}
+    		}
+    		closedir($handle);
+    	}
+    	return $files;
+    }
+
+    /* function:  returns a file's extension */
+    function get_file_extension($file_name) {
+    	return substr(strrchr($file_name,'.'),1);
+    }
+
+    /** settings **/
+    $images_dir = 'photos/';
+    $thumbs_dir = 'photos-thumbs/';
+    $thumbs_width = 1000;
+    $images_per_row = 3;
+
+    /** generate photo gallery **/
+    $image_files = get_files($images_dir);
+    if(count($image_files)) {
+    	$index = 0;
+    	foreach($image_files as $index=>$file) {
+    		$index++;
+    		$thumbnail_image = $thumbs_dir.$file;
+    		if(!file_exists($thumbnail_image)) {
+    			$extension = get_file_extension($thumbnail_image);
+    			if($extension) {
+    				make_thumb($images_dir.$file,$thumbnail_image,$thumbs_width);
+    			}
+    		}
+
+        $size = getimagesize($images_dir.$file);
+        $width = explode("\"",$size[3])[1];
+        $height = explode("\"",$size[3])[3];
+        echo '<a href="',$images_dir.$file,'" class="thumbnail justifiedGallery" itemprop="contentUrl" rel="gallery" data-size="' . $width . "x" . $height . '" data-index="6"><img src="',$thumbnail_image,'" /></a>';
+      }
+    }
+    else {
+    	echo '<p>There are no images in this gallery.</p>';
+    }
+    ?>
+  </div>
   </body>
 
   <!-- justifiedGallery plugin -->

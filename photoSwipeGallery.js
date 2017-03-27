@@ -30,6 +30,7 @@ $('.imageGallery').each( function() {
         var options = {
             index: $index,
             bgOpacity: 0.7,
+            shareEl: false,
             showHideOpacity: true
         }
 
