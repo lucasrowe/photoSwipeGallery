@@ -1,0 +1,12 @@
+_site/
+.sass-cache/
+.jekyll-metadata
+node_modules/
+
+# Private Repos
+photoswipe/
+justifiedGallery/
+
+# OS files
+.DS_Store
+thumbs.db
